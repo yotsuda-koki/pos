@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Java POS System - 食料品0%対応</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; background-color: #f4f7f6; }
+        .container { max-width: 600px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .input-group { margin-bottom: 20px; }
+        input { padding: 10px; width: 60%; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; cursor: pointer; background: #3498db; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #2980b9; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border-bottom: 1px solid #eee; padding: 12px; text-align: left; }
+        .total-area { margin-top: 20px; text-align: right; font-size: 1.5em; font-weight: bold; color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>簡易レジシステム</h1>
+    
+    <div class="input-group">
+        <input type="text" id="janCode" placeholder="JANコードを入力 (例: 111, 222)">
+        <button onclick="addToCart()">スキャン</button>
+    </div>
+
+    <table id="cartTable">
+        <thead>
+            <tr>
+                <th>JANコード</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+
+    <div class="total-area">
+        合計: <span id="displayTotal">0</span> 円
+    </div>
+    
+    <button style="width: 100%; margin-top: 20px; background: #27ae60;" onclick="checkout()">会計確定（DB保存）</button>
+</div>
+
+<script>
+    let cart = [];
+
+    function addToCart() {
+        const code = document.getElementById('janCode').value;
+        if (!code) return;
+        
+        cart.push(code);
+        const row = `<tr><td>${code}</td></tr>`;
+        document.querySelector('#cartTable tbody').insertAdjacentHTML('beforeend', row);
+        document.getElementById('janCode').value = '';
+    }
+
+    async function checkout() {
+        if (cart.length === 0) return alert("カートが空です");
+
+        try {
+            const response = await fetch('/api/pos/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cart) // JANコードの配列を送信
+            });
+            
+            const result = await response.json();
+            document.getElementById('displayTotal').innerText = result.totalInclusiveAmount;
+            alert(`決済完了！ 税込合計: ${result.totalInclusiveAmount}円`);
+            
+            // カートをクリア
+            cart = [];
+            document.querySelector('#cartTable tbody').innerHTML = '';
+        } catch (error) {
+            console.error("Error:", error);
+            alert("決済処理に失敗しました");
+        }
+    }
+</script>
+
+</body>
+</html>
