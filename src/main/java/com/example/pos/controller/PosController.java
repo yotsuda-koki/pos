@@ -2,6 +2,7 @@ package com.example.pos.controller;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/pos")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000") // Reactの開発サーバーを許可
 public class PosController {
     private final PosService posService;
 
