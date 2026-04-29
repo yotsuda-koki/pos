@@ -35,6 +35,12 @@ function App() {
     }
   };
 
+  const handleCancel = () => {
+    if (window.confirm("カートの内容をすべてクリアしますか？")) {
+      setCart([]);
+    }
+  };
+
   return (
     <div className="flex h-screen bg-slate-100 text-slate-900 p-4 gap-4 overflow-hidden">
       {/* 左：注文明細（Cart View） */}
@@ -82,7 +88,10 @@ function App() {
           <button className="bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg">
             割引
           </button>
-          <button className="bg-rose-600 text-white font-bold py-4 rounded-2xl shadow-lg">
+          <button
+            onClick={handleCancel}
+            className="bg-rose-600 text-white font-bold py-4 rounded-2xl shadow-lg"
+          >
             キャンセル
           </button>
         </div>

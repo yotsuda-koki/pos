@@ -60,10 +60,11 @@ public class PosService {
             productRepository.save(product);
             
             TaxCategoryEntity taxCategory = product.getTaxCategory();
-            String beanName = (taxCategory.getTaxRate().compareTo(BigDecimal.ZERO) == 0) ? "zeroTax" : "standardTax";
-            TaxCalculator calculator = taxCalculators.get(beanName);
-           
-            int inclusivePrice = calculator.calculate(product.getBasePrice());
+            BigDecimal taxRate = taxCategory.getTaxRate();
+            
+            int inclusivePrice = new BigDecimal(product.getBasePrice())
+            		.multiply(BigDecimal.ONE.add(taxRate))
+            		.intValue();
             int taxAmount = inclusivePrice - product.getBasePrice();
 
             SaleDetailEntity detail = new SaleDetailEntity();
@@ -71,7 +72,7 @@ public class PosService {
             detail.setProductId(product.getId());
             detail.setQuantity(1);
             detail.setUnitPrice(product.getBasePrice());
-            detail.setTaxRate(calculator.getRate()); // エラー解消
+            detail.setTaxRate(taxRate.doubleValue()); // エラー解消
             details.add(detail);
 
             totalEx += product.getBasePrice();
