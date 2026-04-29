@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import lombok.Data;
@@ -24,7 +26,11 @@ public class ProductEntity {
     private String name;
 
     private int basePrice;
-
+    
     @Column(nullable = false)
-    private String taxCategory; // "FOOD" or "GENERAL"
+    private int stock;
+
+    @ManyToOne
+    @JoinColumn(name="tax_category_id", nullable = false)
+    private TaxCategoryEntity taxCategory;
 }

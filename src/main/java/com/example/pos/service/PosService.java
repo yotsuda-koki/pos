@@ -1,5 +1,6 @@
 package com.example.pos.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import com.example.pos.domain.TaxCalculator;
 import com.example.pos.domain.entity.ProductEntity;
 import com.example.pos.domain.entity.SaleDetailEntity;
 import com.example.pos.domain.entity.SaleHeaderEntity;
+import com.example.pos.domain.entity.TaxCategoryEntity;
 import com.example.pos.model.ItemRequest;
 import com.example.pos.repository.ProductRepository;
 import com.example.pos.repository.SaleHeaderRepository;
@@ -50,9 +52,17 @@ public class PosService {
             ProductEntity product = productRepository.findByJanCode(janCode)
                 .orElseThrow(() -> new RuntimeException("商品未登録: " + janCode));
 
-            String beanName = "FOOD".equals(product.getTaxCategory()) ? "zeroTax" : "standardTax";
-            TaxCalculator calculator = taxCalculators.get(beanName);
+            if (product.getStock() <= 0) {
+            	throw new RuntimeException("在庫不足：" + product.getName());
+            }
             
+            product.setStock(product.getStock() - 1);
+            productRepository.save(product);
+            
+            TaxCategoryEntity taxCategory = product.getTaxCategory();
+            String beanName = (taxCategory.getTaxRate().compareTo(BigDecimal.ZERO) == 0) ? "zeroTax" : "standardTax";
+            TaxCalculator calculator = taxCalculators.get(beanName);
+           
             int inclusivePrice = calculator.calculate(product.getBasePrice());
             int taxAmount = inclusivePrice - product.getBasePrice();
 
